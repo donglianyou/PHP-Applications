@@ -7,7 +7,7 @@ $month = isset($_GET['m'])?$_GET['m']:date('n',time());
 //获取当前月总数
 $days = date('t',strtotime("{$year}-{$month}-1"));
 //本月一号是周几
-$week = date('w',strtotime("{$year}-{$month}-4"));
+$week = date('w',strtotime("{$year}-{$month}-1"));
 //每月的第一天
 $first=1-$week;
 //下一个月

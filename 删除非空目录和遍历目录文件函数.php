@@ -1,6 +1,36 @@
 <?php
 header('Content-Type:text/html;charset=utf-8');
-$dir='pm.cn';
+$srcdir='home'; //原目录
+$dstdir='admin'; //目标目录
+
+//复制非空目录包括文件到目标目录
+function copydir($srcdir,$dstdir){
+    if (!file_exists($dstdir)) {
+        mkdir($dstdir);
+    }else{
+
+    }
+    if (is_dir($srcdir)) {
+        $files=scandir($srcdir);
+        foreach ($files as $file) {
+            if ($file!='.' && $file!='..') {
+                $srcpath=$srcdir.'/'.$file;
+                $dstpath=$dstdir.'/'.$file;
+                if (is_dir($srcpath)) {
+                    copydir($srcpath,$dstpath);
+                }else{
+                    copy($srcpath,$dstpath);
+                }
+            }else{
+
+            }
+        }
+    }else{
+        die("未找到目录！");
+    }
+}
+
+
 //递归删除非空目录
 function deldir($dir){
     if (is_dir($dir)) {
@@ -16,11 +46,18 @@ function deldir($dir){
             }
         }
         rmdir($dir);
-        echo "删除成功！";
+        //die("删除成功！");
     }else{
-        echo "未找到指定的目录！";
+        die("未找到指定的目录！");
     }
 }
+
+//移动非空目录包括文件
+function movedir($srcdir,$dstdir){
+    copydir($srcdir,$dstdir);
+    deldir($srcdir);
+}
+
 //递归遍历目录及目录下的所有文件和文件夹,返回文件数组  
 $files=array();
 function listAllFiles($dir=""){           

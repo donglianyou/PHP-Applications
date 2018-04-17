@@ -1,0 +1,561 @@
+字段类型：
+数值类型：
+int
+tinyint
+smallint
+mediumint
+bigint
+float
+
+
+字符串类型：
+char
+varchar
+tinytext
+text
+mediumtext
+longtext
+
+字段属性：
+1·unsigned  无符号
+2·zerofill  0填充
+3·auto_increment
+4·null
+5·not null
+6·default 
+
+查看表所有字段：
+desc user;
+
+添加字段：
+alter table user add sex varchar(30) not null;
+
+添加字段到指定字段后面：
+alter table user add name varchar(30) not null after pass;
+
+添加字段到第一个：
+alter table user add tag varchar(40) not null first;
+
+删除字段：
+alter table user drop pass;
+
+修改字段：
+alter table user modify pass varchar(40) not null;
+
+修改字段名称：
+alter table user change pass password varchar(30) not null;
+
+索引：
+查看索引：
+show index from user\G
+
+主键索引：
+
+添加：
+alter table user2 add primary key(id);
+
+添加自增：
+alter table user2 modify id int unsigned auto_increment;
+
+create table user2(
+-> id int unsigned auto_increment not null primary key,
+-> username varchar(30) not null
+-> );
+
+create table user2(
+-> id int unsigned auto_increment not null,
+-> username varchar(30) not null
+-> primary key(id));
+删除：
+alter table user2 modify id int unsigned not null;
+alter table user2 drop primary key;
+
+唯一索引：
+
+添加：
+create unique index u_username on user(username);
+alert table user2 add unique u_username(username);
+删除：
+drop index u_username on user;
+alert table user2 drop index u_username;
+
+
+普通索引：
+
+添加：
+create index i_username on user(age);
+alter table user2 add index i_username(username);
+删除：
+drop index i_username on user;
+alter table user2 drop index i_username;
+
+数据库操作：
+1·DCL   //数据控制语句：grant,commit,rollback;
+2·DDL   //数据语意语言：create,drop,alter;
+3·DML   //数据操作语言：insert,update,delete;
+4·DQL   //数据查询语言：select;
+
+select * from user where id>=3 and id<=10;
+select * from user where id between 3 and 10;
+select * from user where id=2 or id=5 or id>10;
+select * from user where id in(2,5,6,9);
+
+查询一般优化：
+1·查单列的速度要优于多列。
+2·查主键的列中的所有值要比其他速度快。
+
+select id,username from user;
+
+给字段取别名：
+select username as user,password as pass from user;
+或
+select username user,password pass from user;
+
+distinct关键字的使用(查询唯一值，不重复的值)：
+select distinct username from user;
+
+like模糊查询使用：
+select * from user where username like '%user%';
+
+查询值为null:
+select * from user where password is null;
+查询值不为null:
+select * from user where password is not null;
+
+升序排序：(默认升序)
+select * from user order by id asc;
+降序排序：
+select * from user order by id desc;
+
+delete 和truncate的区别：
+delete 清空表数据，但不会清除计数器（自增计数器）
+truncate清空表数据，同时会清除计数器（自增计数器）
+truncate user;
+
+
+数据库备份：
+mysqldump --no-defaults -uroot -proot -B msg --skip-add-locks --compact>F:/mysql_msg.sql
+
+还原数据库：
+方法一(dos下恢复)：
+mysql -uroot -proot <f:\mysql_msg.sql
+
+方法二（mysql命令行中恢复）：
+source F:/dump_mysql.sql
+
+连接函数：
+select concat('id:',id) id, concat('user:',username) user, concat('pass:',password) pass from user;
+select id,username,password, concat(id,'-',username,'-',password) iduserpass from user;
+
+随机函数：
+select rand();
+随机一条中奖名单：
+select * from user oder by rand() limit 1;
+
+统计个数count()函数：
+select count(*) from user;
+select count(id) from user;
+统计符合条件的行数：
+select count(id) from user where id>3;
+
+求和sum():
+select sum(id) from user;
+
+求平均值avg():
+select avg(id) from user;
+
+最大值max();
+select max(id) from user;
+
+最小值min();
+select min(id) from user;
+
+当前时间戳：
+unix_timestamp();
+
+时间戳转正常日期：
+from_unixtime(时间戳);
+
+user表数据：
++----+----------+----------+-------+
+| id | username | password | class |
++----+----------+----------+-------+
+|  1 | user1    | 123      |     1 |
+|  2 | user2    | 123      |     4 |
+|  3 | user3    | 123      |     1 |
+|  4 | user4    | 123      |     2 |
+|  5 | user5    | 123      |     1 |
+|  6 | user6    | 123      |     2 |
+|  7 | user7    | 123      |     3 |
+|  8 | user8    | 123      |     1 |
+|  9 | user9    | 123      |     4 |
+| 10 | user10   | 123      |     1 |
+| 11 | user11   | 123      |     3 |
+| 12 | user12   | 123      |     3 |
+| 13 | user14   | 123      |     1 |
++----+----------+----------+-------+
+
+group by 分组聚合的使用：
+按条件进行分组，然后在分组的基础上进行有条件的聚合。
+
+把每个班的第一个人取出：
+select * from user group by class;
+
+统计各班级有多少人：
+select concat(class,' 班') '班级',concat(count(*),' 人') '人数' from user group by class;
++------+------+
+| 班级 | 人数 |
++------+------+
+| 1 班 | 6 人 |
+| 2 班 | 2 人 |
+| 3 班 | 3 人 |
+| 4 班 | 2 人 |
++------+------+
+
+mysql多表联合查询：
+1·普通多表查询：
+--班级表
+create table class(
+    id int unsigned auto_increment primary key,
+    name varchar(50) not null,
+    ctime int not null
+);
+--学员表
+create table user(
+    id int unsigned auto_increment primary key,
+    username varchar(50) not null,
+    age tinyint not null,
+    class_id int not null
+);
+
+查询出每个学员的姓名、年龄、班级名称和班级创建时间，并将时间戳转成正常日期显示出来：
+select user.username,user.age,class.name,from_unixtime(class.ctime) ctime from user,class where user.class_id=class.id;
+
+2·子查询/嵌套查询（少用，普通多表查询能做到）：
+查询user表中存在的所有班级的信息：
+select * from class where id in(select distinct class_id from user);
+
+查询班级表中每个班的所有学员信息：
+select * from user where class_id in(select id from class);
+select user.* from user,class where user.class_id=class.id; --（普通多表查询）
+3·链接查询：
+1)左链接(left join)：
+统计每个班级的总人数：
+select class.id '班级',class.name '班级名称',count(user.id) '总人数' from class left join user on class.id=user.class_id group by class.id;
++------+----------+--------+
+| 班级 | 班级名称 | 总人数 |
++------+----------+--------+
+|    1 | class1   |      3 |
+|    2 | class2   |      3 |
+|    3 | class3   |      3 |
+|    4 | class4   |      0 |
++------+----------+--------+
+2)右链接(right join)：
+统计每个班级的总人数：
+select class.id '班级',class.name '班级名称',count(user.id) '总人数' from user right join class on class.id=user.class_id group by class.id;
+
+3)内链接(inner join)(和普通多表查询一样)：
+查询每个用户的用户名和对应的班级名称：
+select user.username ,class.name from user inner join class on class.id=user.class_id;
+
+mysql复制表：
+1·复制表结构：
+create table student like user;
+2·复制表数据：
+insert into student select * from user;
+
+mysql视图(虚拟表，逻辑表)：
+1·创建：
+create view userclass as select user.username,user.age,class.name from user,class where user.class_id=class.id;
+2·删除：
+drop view userclass;
+
+3·查看：
+show tables;
+4·查看视图数据：
+select * from userclass;
+
+5·视图特性：
+当表中数据发生变化时，视图数据也随之发生变化。
+
+mysql中查看表中未来的自增数：
+show create table user;
+
+mysql字符串函数：
+1·字符串连接：
+concat();
+select id ,concat('user:',username),age from user;
+
+2·转换为小写：
+lcase();
+select id ,lcase(username),age from user;
+
+3·转大写：
+ucase();
+select id ,ucase(username),age from user;
+
+4·长度：
+length();
+select id ,length(username),username,age from user;
+
+5·去除左边空格：
+ltrim();
+select length(ltrim('     linux'));
+
+6·去除右边空格：
+rtrim();
+select length(rtrim('linux     '));
+
+7·重复：
+repeat('字符','重复个数');
+select repeat('-',10);
+
+8·替换：
+replace('字符串','要替换的字符串','替换成什么');
+select replace('linux and java','linux','php');
+
+9·截取：
+substring('字符串','开始位置，1开始','截取个数');
+select substring('/usr/local/src/home',6,5);
+
+10·空格：
+space();
+select concat('linux',space(20),'php');
+
+mysql数学函数：
+1·bin();
+十进制转二进制
+select bin(10);
+
+2·ceiling();
+取上一个整数
+select ceiling(21.13); //22
+
+3·floor();
+取下一个整数
+select ceiling(21.13); //21
+4·max();
+取最大数
+select max(id) from user;
+
+5·min();
+取最小数
+select min(id) from user;
+6·sqrt();
+开平方
+select sqrt(100);   //10
+
+7·rand();
+求随机数
+select * from user order by rand(); //随机排序
+
+mysql日期函数：
+1·curdate();
+当前日期：
+select curdate();
+
+2·curtime();
+当前时间：
+select curtime();
+
+3·now();
+当前日期和时间：
+select now();
+
+4·unix_timestamp();
+当前时间戳：
+select unix_timestamp();
+
+5·from_unixtime();
+时间戳转日期：
+select from_unixtime(1523446473);
+
+6·week(date);
+一年中的第几周：
+select week('2018-04-21');
+
+7·year(date);
+获取日期中的年份：
+select year('2018-02-20');
+
+8·datediff();
+日期差值（返回天数）：
+select datediff('2018-6-10','2018-2-23');
+
+重排 auto_increment方法：
+1·delete
+delete from student;
+alter table student auto_increment=1;
+
+2·truncate
+truncate test;
+
+mysql中命令的帮助：
+1·简单
+? create
+? show
+
+? alter
+? delete
+? unix_timestamp
+......
+2·获取更多相似的：
+？sh%
+? fl%
+? cre%
+? fun%
+......
+
+巧用rand()提取随机行：
+select * from user order by rand() limit 3;
+
+mysql中的正则表达式的使用：
+查询出包含php或者linux结尾的数据：
+select * from user where username regexp 'php$|linux$';
+
+优化SQL语句一般步骤：
+1·检查msyql服务器增、删、改、查使用频率(本次连接以来)：
+show status like "%Com_insert%";
+show status like "%Com_delete%";
+show status like "%Com_update%";
+show status like "%Com_select%";
+
+检查msyql服务器增、删、改、查使用频率(本次mysql服务器启动以来)：
+show global status like "%Com_insert%";
+show global status like "%Com_delete%";
+show global status like "%Com_update%";
+show global status like "%Com_select%";
+
+查InnoDB自连接以来的影响行数：
+show status like "%InnoDB_rows%";
+
+定位执行效率较低的SQL语句：
+1·explain或者desc定位一条SQL语句的影响行数。
+explain select * from user where id=7\G
+desc select * from user where id=7\G
+
+2·查看mysql的慢查询日志。
+1)查看慢查询是否开启：
+show variables like "%quer%";
+
+slow_query_log                | ON  //说明是开启状态
+slow_query_log_file           | ../../phpwamp-log/mysql-log/mysql_slowquery.log     //文件位置
+long_query_time               | 2.000000    //超过2秒的sql语句才会被记载
+
+2)查看慢查询的次数：
+show global status like "%quer%";
+
+Slow_queries            | 3     //3次
+
+3)修改慢查询的是时间（my.ini):
+long_query_time=5;
+重启mysql之后生效
+
+优化表空间：
+optimize table student;
+1·myisam表没问题。
+2·innoDB表ibdata1文件无法回收空间。
+
+
+check表检查：
+check table v_user;
+
+| msg.v_user | check | Error    | Table 'msg.class' doesn't exist 
+| msg.v_user | check | Error    | View 'msg.v_user' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them
+| msg.v_user | check | error    | Corrupt
+索引的存储分类：
+1·myisam
+1) frm 表结构
+2) myd 表数据
+3) myi 表索引
+
+2·innoDB
+1) frm 表结构
+2) ibd 索引+部分表数据
+3) ibdata1 所有表共享空间
+
+复合索引：
+对于创建的多列索引，只要查询的条件中用到最左边的列，索引一般就会被使用.
+
+like关键字：
+desc select * from user where username like 'linux%'\G
+当使用like进行搜索时，%在前索引可能会失效。
+
+null判断：
+desc select * from user where username is null;
+当判断null值时会使用到username这一列索引。
+
+or关键字：
+DESC select * from user where username='user7' or age=25\G
+
+在使用or的情况下两边的索引都有可能失效。
+
+字段和值类型不同 ：
+desc select * from user where username=200\G
+当条件中字段和值类型不同时，该字段的索引可能会失效。
+
+查看索引的使用频次：
+show status like "%Handler_read%";
++-----------------------+-------+
+| Variable_name         | Value |
++-----------------------+-------+
+| Handler_read_key      | 32    |   #越大越好
+| Handler_read_rnd_next | 308   |   #越小越好
++-----------------------+-------+   
+
+多表查询索引使用：
+desc select * from t1 where class_id in (select id from class)\G
+desc select t1.* from t1,class where t1.class_id=class.id\G
+desc select t1.* from class left join t1 on t1.class_id=class.id\G
+目前5.7的版本中常用的多表查询都进行了优化。
+
+Mysql 服务器优化：
+1·四种字符集问题。
+default-character-set=utf8
+character-set-server=utf8
+collation-server=utf8
+2·slow log慢查询日志问题。
+3·root 密码丢失
+
+mysql root 密码破解：
+1·密码没有忘，改密码：
+set password=password('123');
+
+2·密码忘记了，破解密码：
+1)关闭mysql服务器(net stop mysql)
+
+2)切换到mysql目录下bin目录找到mysqld.exe
+
+3)运行命令：
+linux:
+mysqld_safe --skip-grant-tables --user=mysql &
+
+windows:
+mysqld.exe --skip-grant-tables --user=mysql &
+//跳过授权表mysql.user和mysql.db这些表
+
+4)无密码登录：
+mysql -uroot
+
+5）修改密码：
+set password=password('123');
+如果报错，请使用：
+update user set password=password('123') where user='root' and host='localhost';
+或者：
+set password for root@localhost=password('123');
+
+5.7版本修改密码：
+刷新管理员权限：flush privileges;
+alter user 'root'@'localhost' identified by '123';
+
+6)关闭win下任务管理器中mysqld进程。
+7）重新启动mysql服务。
+net stop mysql
+
+
+
+
+
+
+
+
